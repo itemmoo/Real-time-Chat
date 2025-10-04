@@ -13,15 +13,11 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // MongoDB Atlas Connection
-// แทน <db_password> ด้วยรหัสผ่านของคุณ
-const mongoURL = 'mongodb+srv://itemmoo:<moosic4826>@cluster0.74g4yvb.mongodb.net/todoApp?retryWrites=true&w=majority';
+const mongoURL = 'mongodb+srv://itemmoo:moosic4826@cluster0.74g4yvb.mongodb.net/todoApp?retryWrites=true&w=majority';
 
-mongoose.connect(mongoURL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('✅ MongoDB Atlas connected'))
-.catch(err => console.error('❌ MongoDB connection error:', err));
+mongoose.connect(mongoURL)
+  .then(() => console.log('✅ MongoDB Atlas connected'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // Todo Model
 const TodoSchema = new mongoose.Schema({
@@ -29,12 +25,9 @@ const TodoSchema = new mongoose.Schema({
   date: { type: String, default: null },
   done: { type: Boolean, default: false }
 });
-
 const Todo = mongoose.model('Todo', TodoSchema);
 
 // Routes
-
-// Homepage
 app.get('/', async (req, res) => {
   try {
     const todos = await Todo.find().sort({ _id: -1 });
@@ -44,17 +37,12 @@ app.get('/', async (req, res) => {
   }
 });
 
-// API Routes
-
-// Add Todo
 app.post('/api/add', async (req, res) => {
   try {
     const { task, date } = req.body;
     if (!task) return res.status(400).json({ error: 'Task required' });
-
     const todo = new Todo({ task, date: date || null });
     await todo.save();
-
     const todos = await Todo.find().sort({ _id: -1 });
     res.json(todos);
   } catch (err) {
@@ -62,7 +50,6 @@ app.post('/api/add', async (req, res) => {
   }
 });
 
-// Toggle Done
 app.post('/api/toggle/:id', async (req, res) => {
   try {
     const todo = await Todo.findById(req.params.id);
@@ -77,7 +64,6 @@ app.post('/api/toggle/:id', async (req, res) => {
   }
 });
 
-// Delete Todo
 app.post('/api/delete/:id', async (req, res) => {
   try {
     await Todo.findByIdAndDelete(req.params.id);
